@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pasarela de pago (Paypal)</title>
+    <script src="https://www.paypal.com/sdk/js?client-id=(Aca tienes que poner tu cliente id, ya que si no no funcionaran los botones)"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-[#0C0C0F]">
+    <div class="relative overflow-y-auto w-full">
+        <div class="flex flex-col text-zinc-300 h-screen items-center justify-center w-full  z-[-2]">
+          <div class="p-6 rounded-xl w-96  bg-[#131417] rounded-xl border-[1px] border-[#222227]">
+      
+          <div
+          class="relative w-full inline-flex shadow-sm text-zinc-300 px-3 bg-zinc-900 hover:bg-zinc-800 min-h-unit-20 rounded-xl flex-col items-start justify-center gap-0 transition-all motion-reduce:transition-none !duration-150 outline-none  h-14 py-2"
+          style="cursor: text;"><label
+          class="block font-medium text-zinc-300 text-tiny will-change-auto origin-top-left transition-all !duration-200 !ease-[cubic-bezier(0,0,0.2,1)] motion-reduce:transition-none text-sm"
+          id="react-aria3660515857-:r77:" for="react-aria3660515857-:r76:">Products</label>
+          <select id="product_id" name="product_id" required class="w-full  text-lg bg-transparent h-full text-zinc-600 outline-none border-none ring-none transition-all duration-400">
+            {% for producto in productos %}
+            <option  class="bg-zinc-900 text-zinc-400 outline-none" value="{{ producto.id }}" data-precio="{{ producto.precio }}" data-descripcion="{{ producto.descripcion }}" data-nombre="{{ producto.nombre }}" data-type="{{ producto.type }}">{{ producto.nombre }}</option>
+            {% endfor %}
+          </select>
+          </div>
+          <div class="relative  my-3">
+      <div class="absolute flex items-center justify-center text-center h-16 w-full rounded-xl bg-black/50">
+        <h3 id="product_title" class="text-white font-bold text-2xl">GENERAL</h3>
+      </div>
+          <div id="product_img"  class="h-16 w-full rounded-xl bg-center bg-cover" style="background-image: url('https://wallpapers.com/images/hd/fivem-zhg48vbp6zfjz15i.jpg');"> </div>
+      </div>
+          <div class="space-y-3 mb-3">
+            <div>
+              <h2 class="block font-medium text-zinc-300 text-tiny will-change-auto origin-top-left transition-all !duration-200 !ease-[cubic-bezier(0,0,0.2,1)] motion-reduce:transition-none text-sm">Product Name</h2>
+              <p id="product_name"  class="w-full py-1.5 bg-zinc-900 border-[1px] border-[#222227] px-3 rounded-xl"></p>
+            </div>
+            <div>
+                <h2 class="block font-medium text-zinc-300 text-tiny will-change-auto origin-top-left transition-all !duration-200 !ease-[cubic-bezier(0,0,0.2,1)] motion-reduce:transition-none text-sm">Description</h2>
+                <p id="product_description"  class="w-full py-1.5 bg-zinc-900 border-[1px] border-[#222227] px-3 rounded-xl"></p>
+              </div>
+              <p id="product_price"  class="text-gray-100 font-medium text-xl"></p>
+          </div>
+      
+          <div id="paypal-button-container" class="z-[-1]"></div>
+      
+        </div>
+      </div>
+    </div>
+
+<script>
+    function actualizarDescripcionProducto() {
+        var productSelect = document.getElementById("product_id");
+        var selectedOption = productSelect.options[productSelect.selectedIndex];
+        var descripcionProducto = selectedOption.getAttribute("data-descripcion");
+        var mombreProducto = selectedOption.getAttribute("data-nombre");
+        var precioProducto = selectedOption.getAttribute("data-precio");
+        var productType = selectedOption.getAttribute("data-type");
+  
+  
+        var productName = document.getElementById("product_name");
+        productName = productName.innerHTML = mombreProducto;
+        var productDescription = document.getElementById("product_description");
+        productDescription = productDescription.innerHTML = descripcionProducto;
+        var productPrice = document.getElementById("product_price");
+        productPrice = productPrice.innerHTML = "Price: $" + precioProducto;
+  
+        if (productType == "autos") {
+            document.getElementById("product_img").style.backgroundImage = "url('https://wallpapers.com/images/hd/fivem-zhg48vbp6zfjz15i.jpg')";
+            var productTitle = document.getElementById("product_title");
+            productTitle = productTitle.innerHTML = "AUTOS";
+          
+        } else {
+            document.getElementById("product_img").style.backgroundImage = "url('https://wallpapers.com/images/hd/repsol-honda-sport-bike-wpab1o9pe3c5xtuk.webp')";
+            var productTitle = document.getElementById("product_title");
+            productTitle = productTitle.innerHTML = "MOTOS";
+  
+        }
+      }
+  
+    actualizarDescripcionProducto();
+  
+    var productSelect = document.getElementById("product_id");
+    productSelect.addEventListener("change", actualizarDescripcionProducto);
+  setTimeout(() => {
+    paypal.Buttons({
+        createOrder: function(data, actions) {
+            var productSelect = document.getElementById("product_id");
+            var selectedOption = productSelect.options[productSelect.selectedIndex];
+            var precioProducto = selectedOption.getAttribute("data-precio");
+  
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        value: precioProducto
+                    }
+                }]
+            });
+        },
+        onApprove: function(data, actions) {
+            return actions.order.capture().then(function(details) {
+                alert('Pago exitoso: ' + details.payer.name.given_name);
+            });
+        }
+    }).render('#paypal-button-container');
+  }, 800);
+  </script>
+</body>
+</html>
